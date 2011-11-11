@@ -1,3 +1,5 @@
+import json
+
 import tornado.ioloop
 import tornado.web
 import tornado.database
@@ -7,33 +9,25 @@ class AuditHandler(tornado.web.RequestHandler):
         self.database = database
 
     def get(self, computer_name):
-        # Get the computer requested. If we didn't get a valid 
-        # computer name, send back a 404.
-        computer = self.database.get(
-            'SELECT * FROM computers WHERE computer_name = %s;', 
-            computer_name
-        )
-        if not computer:
-            self.send_error(404)
+        computer = self._get_computer(computer_name)
         
         # Get the audit results for the given computer.
         installations = self.database.query(
             '''
             SELECT
-              a.application_name,
-              a.application_version,
-              i.audit_date
+                a.application_name,
+                a.application_version,
+                i.audit_date
             FROM installations i 
             INNER JOIN computers c 
-              ON i.computer_id = c.computer_id 
+                ON i.computer_id = c.computer_id 
             INNER JOIN applications a 
-              ON i.application_id = a.application_id 
+                ON i.application_id = a.application_id 
             WHERE c.computer_name = %s 
-              AND i.audit_date = 
-                (
-                  SELECT MAX(i2.audit_date)
-                  FROM installations i2 
-                  WHERE i2.computer_id = i.computer_id
+                AND i.audit_date = (
+                    SELECT MAX(i2.audit_date)
+                    FROM installations i2 
+                    WHERE i2.computer_id = i.computer_id
                 )
             ORDER BY a.application_name;
             ''',
@@ -56,8 +50,54 @@ class AuditHandler(tornado.web.RequestHandler):
         
         self.write(result)
 
-    def put(self):
-        pass
+    def post(self, computer_name):
+        computer = self._get_computer(computer_name)
+        
+        data = json.loads(self.request.body)
+        
+        for application in data['applications']:
+            result = self.database.execute(
+                '''
+                INSERT INTO applications (
+                    application_name, 
+                    application_vendor, 
+                    application_version
+                ) SELECT 
+                    %s, 
+                    %s, 
+                    %s 
+                FROM dual WHERE NOT EXISTS (
+                    SELECT * 
+                    FROM applications 
+                    WHERE 
+                        application_name=%s AND 
+                        application_vendor=%s AND 
+                        application_version=%s
+                );
+                ''',
+                application['name'],
+                application['vendor'],
+                application['version'],
+                application['name'],
+                application['vendor'],
+                application['version']
+            )
+            print result
+    
+    def _get_computer(self, computer_name):
+        '''
+        Get the computer requested. If we didn't get a valid 
+        computer name, send a 404 back to the client.
+        '''
+        computer = self.database.get(
+            'SELECT * FROM computers WHERE computer_name = %s;', 
+            computer_name
+        )
+        if computer:
+            return computer
+        else:
+            self.send_error(404)
+            
 
 if __name__ == '__main__':
     database = tornado.database.Connection(
