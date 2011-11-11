@@ -11,6 +11,7 @@ The following format can be used to submit an audit.
         "computer": {
             "name": "<string 1:15>"
         },
+        "date": "<string %yyyy-mm-dd%>",
         "applications": [
             {
                 "name": "<string 1:128>",
