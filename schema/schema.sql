@@ -1,5 +1,5 @@
 --
--- Initializes a fresh DB
+-- Database schema for Auditr app
 -- Note: tables are dropped if they exist!
 --
 
