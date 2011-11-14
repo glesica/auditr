@@ -1,3 +1,5 @@
+import sys
+
 import tornado.ioloop
 import tornado.web
 import tornado.database
@@ -7,16 +9,23 @@ from handlers.computers import ComputerHandler
             
 
 if __name__ == '__main__':
-    database = tornado.database.Connection(
-        'localhost',
-        'auditr',
-        user='root',
-        password='doofus',
-    )
+    debug = ('--debug' in sys.argv) or ('-d' in sys.argv)
 
-    application = tornado.web.Application([
+    if debug:
+        database = tornado.database.Connection(
+            'localhost',
+            'auditr',
+            user='root',
+            password='doofus',
+        )
+    else:
+        pass
+    
+    urls = [
         (r'/audits', AuditHandler, {'database': database}),
         (r'/computers', ComputerHandler, {'database': database}),
-    ], debug=True)
+    ]
+
+    application = tornado.web.Application(urls, debug=debug)
     application.listen(8888)
     tornado.ioloop.IOLoop.instance().start()
