@@ -41,10 +41,28 @@ class AuditHandler(AuditrHandler):
         if limits:
             query = query + ' WHERE ' + ' AND '.join(limits)
         
+        # Figure out limits and where to start then add those 
+        # to the query.
+        first = self.get_argument('first', '0')
+        count = self.get_argument('count', '50')
+        query = query + ' LIMIT %s,%s' % (first, count)
+        
+        # Run the audits query
         audits = self.database.query(query, *params)
         
         # We go the actual audits, build the output and grab the 
         # list of installed applications for each one as we go.
+        applications_query = '''
+            SELECT
+                a.application_name,
+                a.application_vendor,
+                a.application_version
+            FROM installations i
+                INNER JOIN applications a 
+                    ON i.application_id = a.application_id
+            WHERE
+                i.audit_id = %s
+        '''
         response = {
             'status': 'success',
             'audits': []
@@ -55,17 +73,8 @@ class AuditHandler(AuditrHandler):
                 'audit_date': str(audit.audit_date),
                 'audit_id': audit.audit_id,
                 'applications': [
-                    app for app in self.database.query('''
-                        SELECT
-                            a.application_name,
-                            a.application_vendor,
-                            a.application_version
-                        FROM installations i
-                            INNER JOIN applications a 
-                                ON i.application_id = a.application_id
-                        WHERE
-                            i.audit_id = %s
-                    ''', 
+                    app for app in self.database.query(
+                    applications_query, 
                     audit.audit_id
                     )
                 ]
