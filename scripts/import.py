@@ -1,15 +1,22 @@
-import os, httplib, json, csv
+import os, sys, httplib, json, csv
 
 
-DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../logs/')
+DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/')
 
 # Headers
 headers = {
     'Content-Type': 'application/json'
 }
 
-# Establish connection to the test server (localhost:8888)
-conn = httplib.HTTPConnection('localhost', 8888)
+# Establish connection to the server
+if len(sys.argv) > 1:
+    host = sys.argv[1].split(':')[0]
+    port = 8888
+    if ':' in sys.argv[1]:
+        port = int(sys.argv[1].split(':')[1])
+conn = httplib.HTTPConnection(host, port)
+
+print 'Submitting data to host %s:%s' % (host, port)
 
 
 def post(audit):
