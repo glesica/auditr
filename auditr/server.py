@@ -29,15 +29,12 @@ if __name__ == '__main__':
     logging.info('Connecting to database: %s' % DATABASE_HOST)
 
     # Configure the database
-    if debug:
-        database = tornado.database.Connection(
-            DATABASE_HOST,
-            DATABASE_NAME,
-            DATABASE_USER,
-            DATABASE_PASSWORD,
-        )
-    else:
-        pass
+    database = tornado.database.Connection(
+        DATABASE_HOST,
+        DATABASE_NAME,
+        DATABASE_USER,
+        DATABASE_PASSWORD,
+    )
 
     # Configure URLs
     urls = [
