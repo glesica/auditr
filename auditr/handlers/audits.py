@@ -15,29 +15,63 @@ class AuditHandler(AuditrHandler):
         self.database = database
 
     def get(self):
-        # Get the list of computer names for which we are fetching audits
+        query = '''
+            SELECT 
+                u.audit_id,
+                u.audit_date,
+                c.computer_name
+            FROM audits u
+                INNER JOIN computers c ON u.computer_id = c.computer_id
+        '''
+        
+        limits = []
+        params = []
+
+        # Filter on computer_name.
         computer_names = self.get_arguments('computer_name')
-        if not computer_names:
-            self.send_error(400)
+        if computer_names:
+            limits.append(
+                '(' + ' OR '.join(['computer_name=%s' for c in computer_names]) + ')'
+            )
+            params.extend(computer_names)
         
-        # Get the number of audits to return for each computer
-        try:
-            latest = int(self.get_argument('latest', '1'))
-        except ValueError, e:
-            self.send_error(400)
+        # Build and run the audits query, this grabs only 
+        # audit meta data, we get the actual list of applications 
+        # for each audit later.
+        if limits:
+            query = query + ' WHERE ' + ' AND '.join(limits)
         
-        # Build a list of audits for each computer and string them together
-        audits = []
-        for computer_name in computer_names:
-            audits.extend(self._get_audits(computer_name, latest))
+        audits = self.database.query(query, *params)
         
-        # Build a list of audits
-        response_body = {
+        # We go the actual audits, build the output and grab the 
+        # list of installed applications for each one as we go.
+        response = {
             'status': 'success',
-            'audits': audits
+            'audits': []
         }
-        
-        self.write(response_body)
+        for audit in audits:
+            response['audits'].append({
+                'computer': {'computer_name': audit.computer_name},
+                'audit_date': str(audit.audit_date),
+                'audit_id': audit.audit_id,
+                'applications': [
+                    app for app in self.database.query('''
+                        SELECT
+                            a.application_name,
+                            a.application_vendor,
+                            a.application_version
+                        FROM installations i
+                            INNER JOIN applications a 
+                                ON i.application_id = a.application_id
+                        WHERE
+                            i.audit_id = %s
+                    ''', 
+                    audit.audit_id
+                    )
+                ]
+            })
+    
+        self.finish(response)
 
     def post(self):
         data = json.loads(self.request.body)
