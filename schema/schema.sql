@@ -52,6 +52,11 @@ CREATE TABLE audits (
     audit_date DATE NOT NULL,
     computer_id INTEGER NOT NULL,
     
+    UNIQUE INDEX audit_characteristics (
+        audit_date,
+        computer_id
+    )
+    
     FOREIGN KEY fk_computer (computer_id)
         REFERENCES computers (computer_id)
         ON DELETE CASCADE
