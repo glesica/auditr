@@ -51,7 +51,7 @@ class ComputerHandler(AuditrHandler):
         
         computer = self._create_computer(body_data['computer_name'])
         
-        self.write({
+        self.finish({
             'status': 'success',
             'computer': computer
         })
