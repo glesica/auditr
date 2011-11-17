@@ -3,6 +3,4 @@
 [program:auditr]
 process_name = auditr-%(process_num)s
 environment = PYTHONPATH="%(here)s/auditr/envs/auditr/lib/python2.6/site-packages"
-command = %(here)s/auditr/envs/auditr/bin/python 
-    -m chat.chatdemo
-	--port=8888
+command = %(here)s/auditr/envs/auditr/bin/python %(here)s/auditr/auditr/server.py
