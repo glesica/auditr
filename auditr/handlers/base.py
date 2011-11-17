@@ -15,6 +15,11 @@ class AuditrHandler(tornado.web.RequestHandler):
     def initialize(self, database):
         self.database = database
     
+    def _accepted_mimetypes(self):
+        return self.request.headers['accept'].split(',')
+    
+    #TODO: Refactor these out somehow, shouldn't need them
+    
     def _create_application(self, name, vendor, version):
         '''
         Create a single application instance in the database.

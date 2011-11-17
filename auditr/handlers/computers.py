@@ -39,12 +39,19 @@ class ComputerHandler(AuditrHandler):
         # Run the query and write the response
         computers = self.database.query(query, *params)
         
-        self.finish({
-            'status': 'success',
-            'computers': [
-                computers
-            ]
-        })
+        accepted = self._accepted_mimetypes()
+        
+        if 'application/json' in accepted:
+            self.finish({
+                'status': 'success',
+                'computers': [
+                    computers
+                ]
+            })
+        elif 'text/html' in accepted:
+            self.finish('''
+                <html><body><h1>Tristan sucks</h1></body></html>
+            ''')
     
     def post(self):
         body_data = json.loads(self.request.body)
