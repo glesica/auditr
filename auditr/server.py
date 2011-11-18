@@ -48,8 +48,8 @@ def main():
     app = tornado.web.Application(
         urls, 
         debug=options.debug,
-        template_path='auditr/templates/',
-        static_path='auditr/static/',
+        template_path='templates/',
+        static_path='static/',
     )
     app.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
