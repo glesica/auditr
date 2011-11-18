@@ -1,0 +1,17 @@
+body {
+    font-family: sans-serif;
+}
+
+table {
+    border: 1px #ccc solid;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+td, th {
+    border: 1px #ccc solid;
+    padding: 0.25em 0.5em;
+}
+
+
+

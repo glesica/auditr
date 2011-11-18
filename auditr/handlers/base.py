@@ -14,9 +14,43 @@ class AuditrHandler(tornado.web.RequestHandler):
     '''
     def initialize(self, database):
         self.database = database
+        
+        self.default_mimetype = 'application/json'
+        self.provided_mimetypes = {
+            '*': self._return_json,
+            'application/json': self._return_json,
+            'text/html': self._return_html,
+        }
     
     def _accepted_mimetypes(self):
+        #TODO: This sucks, fails when quality setting is present
         return self.request.headers['accept'].split(',')
+    
+    def _return(self, data, template=None, mime=None):
+        '''
+        Generates an actual response based on `data`, a `dict`. It 
+        tries to respect the `Accepts` header sent by the client.
+        Alternatively, if `mime` is specified, then the 
+        given mimetype will be used without checking.
+        '''
+        if mime and mime in self.provided_mimetypes:
+            mimetype = mime
+        else:
+            mimetype = self.default_mimetype
+            for m in self._accepted_mimetypes():
+                if m in self.provided_mimetypes:
+                    mimetype = m
+        
+        self.set_header('Content-Type', mimetype)
+        
+        return self.provided_mimetypes[mimetype](data, template)
+    
+    def _return_json(self, data, template=None):
+        # It's just so simple!
+        self.finish(data)
+    
+    def _return_html(self, data, template):
+        self.render(template, **{'data': data})
     
     #TODO: Refactor these out somehow, shouldn't need them
     

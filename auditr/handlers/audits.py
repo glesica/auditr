@@ -11,9 +11,6 @@ class AuditHandler(AuditrHandler):
     '''
     Handler for `/audits` endpoint.
     '''
-    def initialize(self, database):
-        self.database = database
-
     def get(self):
         query = '''
             SELECT 
@@ -80,7 +77,7 @@ class AuditHandler(AuditrHandler):
                 ]
             })
     
-        self.finish(response)
+        self._return(response, 'audits.html')
 
     def post(self):
         data = json.loads(self.request.body)

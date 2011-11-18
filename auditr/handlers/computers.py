@@ -11,9 +11,6 @@ class ComputerHandler(AuditrHandler):
     '''
     Handler for `/computers` endpoint.
     '''
-    def initialize(self, database):
-        self.database = database
-    
     def get(self):
         query = 'SELECT * FROM computers'
         limits = []
@@ -39,19 +36,12 @@ class ComputerHandler(AuditrHandler):
         # Run the query and write the response
         computers = self.database.query(query, *params)
         
-        accepted = self._accepted_mimetypes()
+        response = {
+            'status': 'success',
+            'computers': computers
+        }
         
-        if 'application/json' in accepted:
-            self.finish({
-                'status': 'success',
-                'computers': [
-                    computers
-                ]
-            })
-        elif 'text/html' in accepted:
-            self.finish('''
-                <html><body><h1>Tristan sucks</h1></body></html>
-            ''')
+        self._return(response, 'computers.html')
     
     def post(self):
         body_data = json.loads(self.request.body)

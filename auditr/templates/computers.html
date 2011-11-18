@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block results %}
+<table>
+    <thead>
+        <tr>
+            <th>Computer ID</th><th>Computer Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in data['computers'] %}
+        <tr>
+            <td>{{ row['computer_id'] }}</td>
+            <td>{{ row['computer_name'] }}</td>
+        </tr>
+        {% end %}
+    </tbody>
+</table>
+{% end %}

@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Auditr</title>
+        <link rel="stylesheet" href="{{ static_url('default.css') }}" />
+    </head>
+    <body>
+        <h1>{{ request.uri }}</h1>
+        {% block results %}{% end %}
+    </body>
+</html>

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block results %}
+{% for audit in data['audits'] %}
+<h2>{{ audit['computer']['computer_name'] }}</h2>
+<dl>
+    <dt>Audit Date</dt>
+    <dd>{{ audit['audit_date'] }}</dd>
+    <dt>Audit ID</dt>
+    <dd>{{ audit['audit_id'] }}</dd>
+</dl>
+<table>
+    <thead>
+        <tr>
+            <th>Application Name</th>
+            <th>Application Vendor</th>
+            <th>Application Version</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in audit['applications'] %}
+        <tr>
+            <td>{{ row['application_name'] }}</td>
+            <td>{{ row['application_vendor'] }}</td>
+            <td>{{ row['application_version'] }}</td>
+        </tr>
+        {% end %}
+    </tbody>
+</table>
+{% end %}
+{% end %}
