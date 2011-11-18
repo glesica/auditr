@@ -45,7 +45,12 @@ def main():
         (r'/computers', handlers.ComputerHandler, {'database': database}),
     ]
     
-    app = tornado.web.Application(urls, debug=options.debug)
+    app = tornado.web.Application(
+        urls, 
+        debug=options.debug,
+        template_path='auditr/templates/',
+        static_path='auditr/static/',
+    )
     app.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
 
